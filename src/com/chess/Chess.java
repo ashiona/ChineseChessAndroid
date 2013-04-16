@@ -175,7 +175,6 @@ public class Chess extends View{
 //		
 //		@Override
 //		public void mouseClicked(MouseEvent e) {
-//			// TODO Auto-generated method stub
 //			Chess c = (Chess)e.getSource();
 //			c.isChosen = true;
 //			new Blink(c);
