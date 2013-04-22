@@ -1,10 +1,11 @@
-package com.chess;
+package com.chessui;
 
 import android.graphics.Point;
 import android.view.View;
+import android.widget.ImageView;
 
 
-public class Chess extends View{
+public class Chess extends ImageView{
 	/**
 	 * 
 	 */
@@ -29,11 +30,11 @@ public class Chess extends View{
 	private boolean isAlive = true;
 	//public boolean isMove = false;
 	
-	Chess(String str, int x, int y){
+	public Chess(String str, int x, int y){
 		super(null);
 		this.name = new String(str);
 		//System.out.println(str);
-		String seprator = new String("-");
+		String seprator = new String("_");
 		String[] sub = str.split(seprator);
 		if(sub.length != 2){
 			System.out.println("input strname has problem!");

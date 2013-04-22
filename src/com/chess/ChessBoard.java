@@ -3,6 +3,8 @@ package com.chess;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import com.chessui.Chess;
+
 public class ChessBoard {
 	private int width;
 	private int height;

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 //import java.util.Iterator;
 import java.util.ListIterator;
 
+import com.chessui.Chess;
+
 
 public class ChessGroup {
 	private int numChess = 0;

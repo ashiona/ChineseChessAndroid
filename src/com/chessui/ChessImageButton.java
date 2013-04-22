@@ -2,11 +2,16 @@ package com.chessui;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
-public class ChessImageView extends ImageView{
+/**
+ * @author Andrew
+ * @deprecated
+ */
+public class ChessImageButton extends ImageButton{
 
-	public ChessImageView(Context context) {
+	public ChessImageButton(Context context) {
 		super(context);
 	}
 

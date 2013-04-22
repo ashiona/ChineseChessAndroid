@@ -1,5 +1,7 @@
 package com.chess;
 
+import com.chessui.Chess;
+
 public class ChessRule {
 	public static void armsRule(ChessBoard cb, Chess c, int x, int y){
 		if(c.getRank().equals("bing")){

@@ -40,10 +40,11 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int red_xiang=0x7f02000f;
     }
     public static final class id {
-        public static final int imageView1=0x7f070003;
-        public static final int main_background_imageView=0x7f070000;
-        public static final int main_retract_button=0x7f070002;
-        public static final int main_start_button=0x7f070001;
+        public static final int imageView1=0x7f070004;
+        public static final int main_background_imageView=0x7f070001;
+        public static final int main_chessbg_LinearLayout=0x7f070000;
+        public static final int main_retract_button=0x7f070003;
+        public static final int main_start_button=0x7f070002;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
