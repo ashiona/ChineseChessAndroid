@@ -1,6 +1,15 @@
 package com.chessui;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -10,6 +19,9 @@ public class Chess extends ImageView{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+
+	public static final String FOLDER_NAME = "images/";
 	public static final int START_X = 25;
 	public static final int START_Y = 25;
 	public static final int SIZE = 55; //Chess size
@@ -30,11 +42,11 @@ public class Chess extends ImageView{
 	private boolean isAlive = true;
 	//public boolean isMove = false;
 	
-	public Chess(String str, int x, int y){
-		super(null);
+	public Chess(String str, int x, int y, Context activityContext){
+		super(activityContext);
 		this.name = new String(str);
 		//System.out.println(str);
-		String seprator = new String("_");
+		String seprator = new String("-");
 		String[] sub = str.split(seprator);
 		if(sub.length != 2){
 			System.out.println("input strname has problem!");
@@ -66,6 +78,18 @@ public class Chess extends ImageView{
 		System.out.println("url is:" + url);
 		System.out.println("name is:" + name);
         System.out.println("chess has been initilized");
+        
+        //Set image resource
+        AssetManager assets = activityContext.getResources().getAssets();
+        InputStream buf;
+		try {
+			buf = new BufferedInputStream((assets.open(FOLDER_NAME+str)));
+	        Bitmap bm = BitmapFactory.decodeStream(buf);
+	        this.setImageBitmap(bm);
+		} catch (IOException e) {
+			Log.w("Chess", "Chess failed to load image resource!");
+			e.printStackTrace();
+		}
 	}
 	
 	// Convert the matrix index to the real pixels

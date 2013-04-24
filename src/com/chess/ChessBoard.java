@@ -11,7 +11,7 @@ public class ChessBoard {
 	private ArrayList<ChessPoint> chessPoints = null;
 	//private int index; 
 	
-	ChessBoard(int width, int height){
+	public ChessBoard(int width, int height){
 		this.width = width;
 		this.height = height;
 		//this.index = -1;

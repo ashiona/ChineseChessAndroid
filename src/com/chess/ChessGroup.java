@@ -4,17 +4,22 @@ import java.util.ArrayList;
 //import java.util.Iterator;
 import java.util.ListIterator;
 
+import android.content.Context;
+
 import com.chessui.Chess;
 
 
 public class ChessGroup {
+	private Context mActivityContext = null;
+	
 	private int numChess = 0;
 	private ArrayList<Chess> chesses = null; // cards list
 	private String color = null;
 	private int index = -1; // use to keep which chess is chosen
 	private int numTaken = 0;
 	
-	ChessGroup(){
+	public ChessGroup(Context mActivityContext){
+		this.mActivityContext = mActivityContext;
 		this.numChess = 0;
 		this.index = -1;
 		this.chesses = new ArrayList<Chess>();
@@ -22,7 +27,8 @@ public class ChessGroup {
 		this.numTaken = 0;
 	}
 	
-	ChessGroup(String[] str, String color){
+	public ChessGroup(Context mActivityContext, String[] str, String color){
+		this.mActivityContext = mActivityContext;
 		this.numTaken = 0;
 		this.index = -1;
 		this.color = color;
@@ -38,7 +44,7 @@ public class ChessGroup {
 				if(strTmp.equals("bing")){ //five bing
 					for(int j = 0; j< 5; j++){
 						// their position are: (0,3),(2,3),(4,3),(6,3),(8,3)
-						Chess c = new Chess(str[i], j*2 , 3);
+						Chess c = new Chess(str[i], j*2 , 3,mActivityContext);
 						c.setId(index);
 						index++;
 						chesses.add(c);
@@ -46,14 +52,14 @@ public class ChessGroup {
 					
 				}else if(strTmp.equals("jiang")){ //one jiang
 					// its position is (0,4)
-					Chess c = new Chess(str[i],4,0);
+					Chess c = new Chess(str[i],4,0,mActivityContext);
 					c.setId(index);
 					chesses.add(c);
 					index ++;
 				}else if(strTmp.equals("ju")){ // two ju
 					for(int j = 0; j< 2; j++){
 						// their position are: (0,0) and (8,0)
-						Chess c = new Chess(str[i], 8*j, 0);
+						Chess c = new Chess(str[i], 8*j, 0,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index++;
@@ -62,7 +68,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("ma")){ // two ma
 					for(int j = 0; j< 2; j++){
 						// their position are: (1,0) and (7,0)
-						Chess c = new Chess(str[i], 6*j+1, 0);
+						Chess c = new Chess(str[i], 6*j+1, 0,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index++;
@@ -70,7 +76,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("pao")){ // two pao
 					for(int j = 0; j< 2; j++){
 						// their position are: (1,2) and (7,2)
-						Chess c = new Chess(str[i], 6*j+1, 2);
+						Chess c = new Chess(str[i], 6*j+1, 2,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index++;
@@ -79,7 +85,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("shi")){ // two shi
 					for(int j = 0; j< 2; j++){
 						// their position are: (3,0) and (5,0)
-						Chess c = new Chess(str[i], j*2+3, 0);
+						Chess c = new Chess(str[i], j*2+3, 0,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index++;
@@ -88,7 +94,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("xiang")){ // two xiang
 					for(int j = 0; j< 2; j++){
 						// their position are: (2,0) and (6,0)
-						Chess c = new Chess(str[i], j*4+2, 0);
+						Chess c = new Chess(str[i], j*4+2, 0,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index++;
@@ -103,7 +109,7 @@ public class ChessGroup {
 				if(strTmp.equals("bing")){ //five bing
 					for(int j = 0; j< 5; j++){
 						// their position are: (0,6),(2,6),(4,6),(6,6),(8,6)
-						Chess c = new Chess(str[i], j*2 , 6);
+						Chess c = new Chess(str[i], j*2 , 6,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index++;
@@ -111,14 +117,14 @@ public class ChessGroup {
 					//index = index + 5;
 				}else if(strTmp.equals("jiang")){ //one jiang
 					// its position is (4,9)
-					Chess c = new Chess(str[i],4,9);
+					Chess c = new Chess(str[i],4,9,mActivityContext);
 					c.setId(index);
 					chesses.add(c);
 					index ++;
 				}else if(strTmp.equals("ju")){ // two ju
 					for(int j = 0; j< 2; j++){
 						// their position are: (0,9) and (8,9)
-						Chess c = new Chess(str[i], 8*j, 9);
+						Chess c = new Chess(str[i], 8*j, 9,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index ++;
@@ -127,7 +133,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("ma")){ // two ma
 					for(int j = 0; j< 2; j++){
 						// their position are: (1,9) and (7,9)
-						Chess c = new Chess(str[i], 6*j+1, 9);
+						Chess c = new Chess(str[i], 6*j+1, 9,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index ++;
@@ -136,7 +142,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("pao")){ // two pao
 					for(int j = 0; j< 2; j++){
 						// their position are: (1,7) and (7,7)
-						Chess c = new Chess(str[i], 6*j+1, 7);
+						Chess c = new Chess(str[i], 6*j+1, 7,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index ++;
@@ -145,7 +151,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("shi")){ // two shi
 					for(int j = 0; j< 2; j++){
 						// their position are: (3,9) and (5,9)
-						Chess c = new Chess(str[i], j*2+3, 9);
+						Chess c = new Chess(str[i], j*2+3, 9,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index ++;
@@ -154,7 +160,7 @@ public class ChessGroup {
 				}else if(strTmp.equals("xiang")){ // two xiang
 					for(int j = 0; j< 2; j++){
 						// their position are: (2,9) and (6,9)
-						Chess c = new Chess(str[i], j*4+2, 9);
+						Chess c = new Chess(str[i], j*4+2, 9,mActivityContext);
 						c.setId(index);
 						chesses.add(c);
 						index ++;
@@ -237,5 +243,14 @@ public class ChessGroup {
 			}
 		}
 		this.setIndex(-1);
+	}
+
+	public Chess findChess(String name) {
+		for(Chess c:this.chesses){
+			if(c.getName().equals(name)){
+				return c;
+			}
+		}
+		return null;
 	}
 }
