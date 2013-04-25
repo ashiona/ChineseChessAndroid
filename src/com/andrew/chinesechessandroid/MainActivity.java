@@ -27,6 +27,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -47,6 +50,10 @@ public class MainActivity extends Activity {
 	private ChessUiUtil chessUiUtil = null;
 	
 	private ViewGroup chessLayout = null;
+	public Chess blinkChess = null;
+	private AlphaAnimation alpha = null;
+	
+	private ImageView boardImg = null;
 	
 	ChessGroup red = null;  //  @jve:decl-index=0:
 	ChessGroup black = null;  //  @jve:decl-index=0:
@@ -55,13 +62,14 @@ public class MainActivity extends Activity {
 	private boolean isOver = false;
 	public boolean isClick = false;
 	
-	private boolean newGameUiInited = false;
+	private boolean isNewGameUiInited = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		mActivityContext = this.getApplicationContext();
+
+//		mActivityContext = this.getApplicationContext();
+		mActivityContext = this;
 		mAssetManager = this.getAssets();
 		
 
@@ -69,9 +77,13 @@ public class MainActivity extends Activity {
 		
 		chessLayout = (ViewGroup)this.findViewById(R.id.main_chessbg_LinearLayout);
 		
-		//Set listener for buttons
+		//Set listener for ui components
+		boardImg = (ImageView) findViewById(R.id.main_background_imageView);
+		boardImg.setOnTouchListener(new ChessBoardOnTouchListener());
 		View newGameBtn = findViewById(R.id.main_start_button);
 		newGameBtn.setOnClickListener(new NewGameOnClickListener());
+		View retractBtn = findViewById(R.id.main_retract_button);
+		retractBtn.setOnClickListener(new RetractOnClickListener());
 		
 	}
 
@@ -202,8 +214,8 @@ public class MainActivity extends Activity {
 		childImageView.setImageResource(R.drawable.black_pao);
 		childImageView.setX(x);
 		childImageView.setY(y);
-//		childImageView.setScaleX(0.8f);
-//		childImageView.setScaleY(0.8f);
+		childImageView.setScaleX(0.8f);
+		childImageView.setScaleY(0.8f);
 		parentLayout.addView(childImageView);
 		return childImageView;
 	}
@@ -244,8 +256,8 @@ public class MainActivity extends Activity {
 			return null;
 		}
 //		childImageView.setImageResource(R.drawable.black_pao);
-		chess.setX(coordinate[0]);
-		chess.setY(coordinate[1]);
+//		chess.setX(coordinate[0]);
+//		chess.setY(coordinate[1]);
 //		childImageView.setScaleX(0.8f);
 //		childImageView.setScaleY(0.8f);
 		parentLayout.addView(chess);
@@ -290,6 +302,7 @@ public class MainActivity extends Activity {
 			if (m.matches()) {
 				// hs.add(tmp.substring(0, tmp.length()-4));
 				hs.add(tmp);
+//				System.out.println("File name: "+tmp);
 			}
 		}
 		if(str == null){
@@ -330,13 +343,13 @@ public class MainActivity extends Activity {
 		public void run() {
 			while(!isOver){
 			//if(!isOver){
-				System.out.println("subthread running!");
-				Chess c;
-				if((c = red.findChess("red-ju.gif"))!=null){
-					Log.d("initGame", "c.getName() "+c.getName());
-					Log.d("initGame", "c.getX() "+c.getX()+" c.getY() "+c.getY());
-					Log.d("initGame", "c.getWidth() "+c.getWidth()+" c.getHeight() "+c.getHeight());
-				}
+//				System.out.println("subthread running!");
+//				Chess c;
+//				if((c = red.findChess("red-ju.gif"))!=null){
+//					Log.d("initGame", "c.getName() "+c.getName());
+//					Log.d("initGame", "c.getX() "+c.getX()+" c.getY() "+c.getY());
+//					Log.d("initGame", "c.getWidth() "+c.getWidth()+" c.getHeight() "+c.getHeight());
+//				}
 				
 			// red chess been clicked first, and another chess been clicked
 				cg1.CalIndex();
@@ -416,9 +429,9 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void run() {
-			while(false==newGameUiInited){
+			while(false==isNewGameUiInited){
 				if(true==initGame()){
-					newGameUiInited=true;
+					isNewGameUiInited=true;
 					Log.d("initGameUIThread", "Init success");
 				}
 			}
@@ -430,13 +443,106 @@ public class MainActivity extends Activity {
 		Toast.makeText(mActivityContext, str,
         	     Toast.LENGTH_SHORT).show();
 	}
-	
+	public class ChessBoardOnTouchListener implements OnTouchListener{
+
+		@Override
+		public boolean onTouch(View v, MotionEvent e) {
+			doMakeToast("Touch at " + e.getX() + ", " + e.getY());
+			if(false==isNewGameUiInited){
+				return false;
+			}
+			int[] tmp = new int[2];
+			tmp = chessUiUtil.convertBoardCoordinateFromWindowXY(e.getX(), e.getY());
+			if (tmp[0] != -1 && tmp[0] != -1) {
+				if (RedPlay == true) {
+					doMakeToast("red side walks");
+
+					red.CalIndex();
+					black.CalIndex();
+					if (red.getIndex() != -1) {
+						Chess c = red.getChess().get(red.getIndex());
+						int old_x = c.getIndX();
+						int old_y = c.getIndY();
+						ChessRule.AllRules(cb, c, tmp[0], tmp[1]);
+						// red.setIndex(-1);
+						red.disableChosen();
+						if (old_x != c.getIndX() || old_y != c.getIndY()) {
+							RedPlay = false;
+							doMakeToast("Now is Black side's turn!");
+						}
+					}
+					if (black.getIndex() != -1) {
+						// Chess c = black.getChess().get(black.getIndex());
+						// c.setChosen(false);
+						black.disableChosen();
+						// black.setIndex(-1);
+					}
+
+				} else {
+					System.out.println("black side walks!");
+
+					red.CalIndex();
+					black.CalIndex();
+					if (red.getIndex() != -1) {
+						// Chess c = red.getChess().get(red.getIndex());
+						// c.setChosen(false);
+						red.disableChosen();
+						// red.setIndex(-1);
+					}
+					if (black.getIndex() != -1) {
+						Chess c = black.getChess().get(black.getIndex());
+						int old_x = c.getIndX();
+						int old_y = c.getIndY();
+						ChessRule.AllRules(cb, c, tmp[0], tmp[1]);
+						// black.setIndex(-1);
+						black.disableChosen();
+						if (old_x != c.getIndX() || old_y != c.getIndY()) {
+							RedPlay = true;
+							doMakeToast("Now is Red side's turn!");
+						}
+
+					}
+				}
+
+			}
+			return false;
+		}
+		
+	}
 	public class NewGameOnClickListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
 			
 			doMakeToast("Black side walks first.");
 			initGame();
+			isNewGameUiInited=true;
+		}
+	}
+	
+	public class RetractOnClickListener implements OnClickListener {
+		@Override
+		public void onClick(View v) {
+			
+			doTestFunction();
+		}
+	}
+	
+	public void doTestFunction(){
+		if(null!=alpha&&alpha.hasStarted()){
+			alpha.reset();
+			alpha.cancel();
+		    alpha = new AlphaAnimation(1.0f, 0.1f);
+		}else{
+		    alpha = new AlphaAnimation(1.0f, 0.1f);
+		    alpha.setDuration(1000);
+		    alpha.setRepeatCount(Animation.INFINITE); 
+		    alpha.setRepeatMode(Animation.REVERSE); 
+		    ImageView bgImg = (ImageView) findViewById(R.id.main_background_imageView);
+		    bgImg.setAnimation(alpha); 
+		    ImageView testImg = blinkChess;
+		    if(null!=testImg)testImg.setAnimation(alpha); 
+		    alpha.startNow();
+		    bgImg.setVisibility(View.INVISIBLE);
 		}
 	}
 }

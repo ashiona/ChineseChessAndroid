@@ -172,7 +172,7 @@ public class ChessGroup {
 				
 			}
 		}
-		System.out.println("index is:" + index);
+//		System.out.println("index is:" + index);
 	}
 	
 	public ArrayList<Chess> getChess(){

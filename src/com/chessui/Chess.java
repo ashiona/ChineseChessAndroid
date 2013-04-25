@@ -4,13 +4,19 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.example.chinesechessandroid.R;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 
 
@@ -26,8 +32,13 @@ public class Chess extends ImageView{
 	public static final int START_Y = 25;
 	public static final int SIZE = 55; //Chess size
 	public static final int GAP = 27; // Chess gap
-	public static final int UNIT = 57; // Chess board unit size
+	public static int UNIT = 57; // Chess board unit size
 	public enum Suits {Red, Black};
+	
+	private Context activityContext = null;
+	private Handler mHandler=null;
+	private AlphaAnimation alpha = null;
+	
 	private int id = 0;
 	private String name = null;
 	private String rank = null;
@@ -44,6 +55,10 @@ public class Chess extends ImageView{
 	
 	public Chess(String str, int x, int y, Context activityContext){
 		super(activityContext);
+		
+		this.activityContext =  activityContext;
+		this.mHandler =new Handler();  
+		
 		this.name = new String(str);
 		//System.out.println(str);
 		String seprator = new String("-");
@@ -75,9 +90,10 @@ public class Chess extends ImageView{
 		this.url = new String("images/" + name);
 		int id = name.indexOf('-');
 		this.rank = new String(name.substring(id+1,name.length()-4));
-		System.out.println("url is:" + url);
-		System.out.println("name is:" + name);
-        System.out.println("chess has been initilized");
+//		System.out.println("url is:" + url);
+//		System.out.println("name is:" + name);
+//		System.out.println("id is:" + id);
+//        System.out.println("chess has been initilized");
         
         //Set image resource
         AssetManager assets = activityContext.getResources().getAssets();
@@ -90,6 +106,9 @@ public class Chess extends ImageView{
 			Log.w("Chess", "Chess failed to load image resource!");
 			e.printStackTrace();
 		}
+		
+		//set on click listener
+		this.setOnClickListener(new OnChessClickListener());
 	}
 	
 	// Convert the matrix index to the real pixels
@@ -155,6 +174,23 @@ public class Chess extends ImageView{
 	}
 	public void setChosen(boolean isChosen) {
 		this.isChosen = isChosen;
+		if(isChosen){
+			//Blink
+			alpha = new AlphaAnimation(1.0f, 0.1f);
+		    alpha.setDuration(1000);
+		    alpha.setRepeatCount(Animation.INFINITE); 
+		    alpha.setRepeatMode(Animation.REVERSE); 
+		    this.setAnimation(alpha);
+		    alpha.startNow();
+		    this.setVisibility(View.INVISIBLE);
+		}else{
+			if(null!=alpha){
+				alpha.reset();
+				alpha.cancel();
+				this.setAnimation(null);
+			    this.setVisibility(View.VISIBLE);
+			}
+		}
 	}
 	public boolean isAlive() {
 		return isAlive;
@@ -189,13 +225,30 @@ public class Chess extends ImageView{
 	public void dead(){
 		this.setChosen(false);
 		this.setAlive(false);
+		this.setVisibility(View.GONE);
 //		this.setVisible(false);
+		Log.w("Chess", getName()+" dead!");
 	}
 	/**
 	 * Inner class. Used to respond mouse click
 	 * @author Louis
 	 *
 	 */
+	class OnChessClickListener implements OnClickListener{
+
+		@Override
+		public void onClick(View v) {
+			Chess c = (Chess) v;
+			if(isChosen)
+				c.setChosen(false);
+			else
+				c.setChosen(true);
+			System.out.println(c.getName());
+			
+			
+		}
+		
+	}
 //	class Moniter extends Mouse {
 //		
 //		@Override
@@ -210,42 +263,4 @@ public class Chess extends ImageView{
 //
 //		
 //	}
-	
-	class Blink implements Runnable{
-		Chess c = null;
-		public Blink(Chess c){
-			this.c = c;
-			(new Thread(this)).start();
-		}
-		@Override
-		public void run() {
-			while (c.isChosen){
-				//begin to blink when first click
-				System.out.println(Thread.currentThread().getName());
-				if (c.isChosen){
-//					c.setVisible(false);
-
-					//time control
-					try{
-						Thread.sleep(200);
-					}
-					catch(Exception e){
-						e.printStackTrace();
-					}
-					
-//					c.setVisible(true);
-					
-					try{
-						Thread.sleep(350);
-					}
-					catch(Exception e){
-						e.printStackTrace();
-					}
-				}
-				
-			}
-			
-		}
-		
-	}
 }
