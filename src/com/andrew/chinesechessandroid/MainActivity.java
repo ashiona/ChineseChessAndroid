@@ -12,6 +12,7 @@ import com.chessui.Chess;
 import com.chessui.ChessUiUtil;
 import com.chess.ChessBoard;
 import com.chess.ChessGroup;
+import com.chess.ChessHistory;
 import com.chess.ChessRule;
 import com.example.chinesechessandroid.R;
 
@@ -48,13 +49,14 @@ public class MainActivity extends Activity {
 	private Context mActivityContext = null;
 	private AssetManager mAssetManager = null;
 	private ChessUiUtil chessUiUtil = null;
+	private ChessHistory chessHistory = null;
 	
 	private ViewGroup chessLayout = null;
 	public Chess blinkChess = null;
 	private AlphaAnimation alpha = null;
 	
 	private ImageView boardImg = null;
-	
+
 	ChessGroup red = null;  //  @jve:decl-index=0:
 	ChessGroup black = null;  //  @jve:decl-index=0:
 	ChessBoard cb = null;  //  @jve:decl-index=0:
@@ -71,6 +73,8 @@ public class MainActivity extends Activity {
 //		mActivityContext = this.getApplicationContext();
 		mActivityContext = this;
 		mAssetManager = this.getAssets();
+		
+		this.chessHistory = new ChessHistory();
 		
 
 		setContentView(R.layout.activity_main);
@@ -101,7 +105,8 @@ public class MainActivity extends Activity {
 		}
 		//ChessUiUtil settings
 		if(false==chessUiUtil.isInitilized()){
-			View mainLayout = View.inflate(this.getApplicationContext(), R.layout.activity_main, null);
+			View.inflate(this.getApplicationContext(), R.layout.activity_main, null);
+			ViewGroup mainLayout = (ViewGroup) findViewById(R.id.main_chessbg_LinearLayout);
 			ImageView bgImg = (ImageView) findViewById(R.id.main_background_imageView);
 			chessUiUtil.initialize(mainLayout, bgImg);
 		}
@@ -325,6 +330,7 @@ public class MainActivity extends Activity {
 		while(it.hasNext()){
 			Chess c = it.next();
 			addImageViewOnLayout(c, chessLayout);
+			if(null==c.mChessUiUtil)c.mChessUiUtil=this.chessUiUtil;
 		}
 	}
 	
@@ -355,49 +361,87 @@ public class MainActivity extends Activity {
 				cg1.CalIndex();
 				cg2.CalIndex();
 				if(cg1.getNumTaken()>1){
-					cg1.disableChosen();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							cg1.disableChosen();
+						}
+					});
 				}
 				if(cg2.getNumTaken()>1){
-					cg2.disableChosen();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							cg2.disableChosen();
+						}
+					});
 				}
 				if(cg1.getNumTaken()==1 && cg2.getNumTaken()==1){
 					//Can not stop click black chess first. it will cause problem. need to be fixed later
 					if(RedPlay == true){ // red chess eat black
-						Chess r = cg1.getChess().get(cg1.getIndex());
-						Chess b = cg2.getChess().get(cg2.getIndex());
-						int x = b.getIndX();
-						int y = b.getIndY();
+						final Chess r = cg1.getChess().get(cg1.getIndex());
+						final Chess b = cg2.getChess().get(cg2.getIndex());
+						final int x = b.getIndX();
+						final int y = b.getIndY();
 						int old_x = r.getIndX();
 						int old_y = r.getIndY();
-						if(r.getRank().equals("pao")){
-							ChessRule.cannonRule(cb, r, b);
-						}else{
-							ChessRule.AllRules(cb, r, x, y);
-						}
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								if(r.getRank().equals("pao")){
+									ChessRule.cannonRule(cb, r, b);
+								}else{
+									ChessRule.AllRules(cb, r, x, y);
+								}
+							}
+						});
+						doMakeToast("old "+old_x+" "+old_y
+								+"new "+x+" "+y);
 						if(old_x != r.getIndX() || old_y != r.getIndY()){
 							RedPlay = false;
-							doMakeToast("Now is Black side's turn!");
-							b.dead();
-							deleteImageViewOnLayout(b, chessLayout);
+							int[] origPoston = {old_x,old_y};
+							chessHistory.doRecordChessEat(r, b, origPoston);
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									b.dead();
+									deleteImageViewOnLayout(b, chessLayout);
+									doMakeToast("Now is Black side's turn! rec:"+chessHistory.chessEvents.size());
+								}
+							});
 						}
 						
 					}else{ // black chess eat red
-						Chess r = cg1.getChess().get(cg1.getIndex());
-						Chess b = cg2.getChess().get(cg2.getIndex());
-						int x = r.getIndX();
-						int y = r.getIndY();
-						int old_x = b.getIndX();
-						int old_y = b.getIndY();
-						if(b.getRank().equals("pao")){
-							ChessRule.cannonRule(cb, b, r);
-						}else{
-							ChessRule.AllRules(cb, b, x, y);
-						}
+						final Chess r = cg1.getChess().get(cg1.getIndex());
+						final Chess b = cg2.getChess().get(cg2.getIndex());
+						final int x = r.getIndX();
+						final int y = r.getIndY();
+						final int old_x = b.getIndX();
+						final int old_y = b.getIndY();
+						runOnUiThread(new Runnable() {
+							public void run() {
+								if(b.getRank().equals("pao")){
+									ChessRule.cannonRule(cb, b, r);
+								}else{
+									ChessRule.AllRules(cb, b, x, y);
+								}
+							}
+						});
+
+						doMakeToast("old "+old_x+" "+old_y
+								+"new "+x+" "+y);
 						if(old_x != b.getIndX() || old_y != b.getIndY()){
 							RedPlay = true;
-							doMakeToast("Now is Red side's turn!");
-							r.dead();
-							deleteImageViewOnLayout(r, chessLayout);
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									doMakeToast("r.dead(); "+r.isAlive());
+									r.dead();
+									deleteImageViewOnLayout(r, chessLayout);
+									doMakeToast("Now is Red side's turn!");
+								}
+							});
+							
 						}
 						
 					}
@@ -406,10 +450,22 @@ public class MainActivity extends Activity {
 					isOver = true;
 					System.out.println("Game over!");
 					if(!cg1.isAlive()){
-						doMakeToast("Red side LOSE, Game Over!");
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								doMakeToast("Red side LOSE, Game Over!");
+							}
+						});
+						isNewGameUiInited=false;
 						//TODO: Make game finish?
 					}else{
-						doMakeToast("Black side LOSE, Game Over!");
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								doMakeToast("Black side LOSE, Game Over!");
+							}
+						});
+						isNewGameUiInited=false;
 					}
 				}
 				try {
@@ -439,15 +495,20 @@ public class MainActivity extends Activity {
 		
 	}
 	
-	public void doMakeToast(String str){
-		Toast.makeText(mActivityContext, str,
-        	     Toast.LENGTH_SHORT).show();
+	public void doMakeToast(final String str){
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(mActivityContext, str,
+		        	     Toast.LENGTH_SHORT).show();
+			}
+		});
 	}
 	public class ChessBoardOnTouchListener implements OnTouchListener{
 
 		@Override
 		public boolean onTouch(View v, MotionEvent e) {
-			doMakeToast("Touch at " + e.getX() + ", " + e.getY());
+//			doMakeToast("Touch at " + e.getX() + ", " + e.getY());
 			if(false==isNewGameUiInited){
 				return false;
 			}
@@ -467,6 +528,8 @@ public class MainActivity extends Activity {
 						// red.setIndex(-1);
 						red.disableChosen();
 						if (old_x != c.getIndX() || old_y != c.getIndY()) {
+							int[] origPostion = {old_x,old_y};
+							chessHistory.doRecordChessMove(c, origPostion);
 							RedPlay = false;
 							doMakeToast("Now is Black side's turn!");
 						}
@@ -479,7 +542,7 @@ public class MainActivity extends Activity {
 					}
 
 				} else {
-					System.out.println("black side walks!");
+					doMakeToast("black side walks!");
 
 					red.CalIndex();
 					black.CalIndex();
@@ -497,6 +560,8 @@ public class MainActivity extends Activity {
 						// black.setIndex(-1);
 						black.disableChosen();
 						if (old_x != c.getIndX() || old_y != c.getIndY()) {
+							int[] origPostion = {old_x,old_y};
+							chessHistory.doRecordChessMove(c, origPostion);
 							RedPlay = true;
 							doMakeToast("Now is Red side's turn!");
 						}
@@ -522,8 +587,15 @@ public class MainActivity extends Activity {
 	public class RetractOnClickListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			
-			doTestFunction();
+			chessHistory.doRecoveryRecordOneTurn();
+			for(Chess c:chessHistory.changedChess){
+				chessUiUtil.doUpdateChessPosition(c);
+			}
+			chessHistory.changedChess.clear();
+			RedPlay = !chessHistory.isBlackTurn;
+			doMakeToast("Retract!");
+			//update ui
+//			doTestFunction();
 		}
 	}
 	

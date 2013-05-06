@@ -4,12 +4,13 @@ import java.util.Arrays;
 
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 public class ChessUiUtil {
 	boolean isInitilized = false;
 	
-	View mainLayout = null;
+	ViewGroup mainLayout = null;
 	ImageView bgImg = null;
 
 	float baseLeft = 0;
@@ -19,7 +20,7 @@ public class ChessUiUtil {
 	int maxUnitLength = 0;
 	int[] location = new int[2];
 	
-	public void initialize(View mainLayout, ImageView bgImg){
+	public void initialize(ViewGroup mainLayout, ImageView bgImg){
 		
 		this.mainLayout = mainLayout;
 		this.bgImg = bgImg;
@@ -123,10 +124,10 @@ public class ChessUiUtil {
 		}
 		back[0] = index_x;
 		back[1] = index_y;
-		Log.w("ChessUiUtil", toString());
-		Log.w("ChessUiUtil", bgImg.getBottom() + " " + bgImg.getTop());
-		Log.w("ChessUiUtil", "convertBoardCoordinate " + mx + " " + my + " > "
-				+ back[0] + " " + back[1]);
+//		Log.w("ChessUiUtil", toString());
+//		Log.w("ChessUiUtil", bgImg.getBottom() + " " + bgImg.getTop());
+//		Log.w("ChessUiUtil", "convertBoardCoordinate " + mx + " " + my + " > "
+//				+ back[0] + " " + back[1]);
 		return back;
 	}
 
@@ -136,6 +137,21 @@ public class ChessUiUtil {
 				+ ", unitWidth=" + unitWidth + ", unitHeight=" + unitHeight
 				+ ", maxUnitLength=" + maxUnitLength + ", location="
 				+ Arrays.toString(location) + "]";
+	}
+	
+	public void doUpdateChessPosition(Chess chess){
+		float[] coordinate = convertChessCoordinate(chess);
+		if(2!=coordinate.length){
+			Log.e("addImageViewOnLayout", "Coordinate dimension not match!!");
+		}
+		chess.setX(coordinate[0]);
+		chess.setY(coordinate[1]);
+//		((ViewGroup) mainLayout).addView(chess);
+	}
+	
+
+	public void doDeleteChessPosition(Chess chess){
+		((ViewGroup) mainLayout).removeView(chess);
 	}
 
 }

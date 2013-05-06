@@ -35,9 +35,11 @@ public class Chess extends ImageView{
 	public static int UNIT = 57; // Chess board unit size
 	public enum Suits {Red, Black};
 	
+	private Chess mChess = null;
 	private Context activityContext = null;
 	private Handler mHandler=null;
 	private AlphaAnimation alpha = null;
+	public ChessUiUtil mChessUiUtil = null;
 	
 	private int id = 0;
 	private String name = null;
@@ -57,7 +59,8 @@ public class Chess extends ImageView{
 		super(activityContext);
 		
 		this.activityContext =  activityContext;
-		this.mHandler =new Handler();  
+		this.mHandler =new Handler(); 
+		this.mChess = this;
 		
 		this.name = new String(str);
 		//System.out.println(str);
@@ -159,7 +162,7 @@ public class Chess extends ImageView{
 		this.pre_y = pre_y;
 	}
 	public void draw(){
-		
+		this.post(new UpdateChessUiTask());
 	}
 	
 	public void setId(int id){
@@ -177,17 +180,19 @@ public class Chess extends ImageView{
 		if(isChosen){
 			//Blink
 			alpha = new AlphaAnimation(1.0f, 0.1f);
-		    alpha.setDuration(1000);
+		    alpha.setDuration(500);
 		    alpha.setRepeatCount(Animation.INFINITE); 
 		    alpha.setRepeatMode(Animation.REVERSE); 
 		    this.setAnimation(alpha);
 		    alpha.startNow();
+//		    this.invalidate();
 		    this.setVisibility(View.INVISIBLE);
 		}else{
-			if(null!=alpha){
+			if( (null!=alpha)&&isAlive){
 				alpha.reset();
 				alpha.cancel();
-				this.setAnimation(null);
+			    this.clearAnimation();
+//			    this.invalidate();
 			    this.setVisibility(View.VISIBLE);
 			}
 		}
@@ -197,6 +202,9 @@ public class Chess extends ImageView{
 	}
 	public void setAlive(boolean isAlive) {
 		this.isAlive = isAlive;
+		if(isAlive){
+			this.setChosen(false);
+		}
 	}
 	
 /*	public boolean isMove() {
@@ -225,7 +233,14 @@ public class Chess extends ImageView{
 	public void dead(){
 		this.setChosen(false);
 		this.setAlive(false);
-		this.setVisibility(View.GONE);
+		this.post(new Runnable() {
+			@Override
+			public void run() {
+				setVisibility(View.GONE);
+//				mChessUiUtil.doDeleteChessPosition(mChess);
+				invalidate();
+			}
+		});
 //		this.setVisible(false);
 		Log.w("Chess", getName()+" dead!");
 	}
@@ -239,13 +254,23 @@ public class Chess extends ImageView{
 		@Override
 		public void onClick(View v) {
 			Chess c = (Chess) v;
-			if(isChosen)
-				c.setChosen(false);
-			else
-				c.setChosen(true);
+			c.setChosen(true);
+//			if(isChosen)
+//				c.setChosen(false);
+//			else
+//				c.setChosen(true);
 			System.out.println(c.getName());
 			
 			
+		}
+		
+	}
+	
+	class UpdateChessUiTask implements Runnable{
+		@Override
+		public void run() {
+			mChessUiUtil.doUpdateChessPosition(mChess);
+			mChess.invalidate();
 		}
 		
 	}
